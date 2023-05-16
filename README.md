@@ -1,5 +1,5 @@
 ## AQUA: Scalable Rowhammer Mitigation by Quarantining Aggressor Rows at Runtime
-作者: Anish Saxena, Gururaj Saileshwar, Prashant J. Nair, and Moinuddin K. Qureshi
+论文作者: Anish Saxena, Gururaj Saileshwar, Prashant J. Nair, and Moinuddin K. Qureshi
 
 论文地址 [MICRO 2022](https://www.microarch.org/micro55/)
 
@@ -23,17 +23,17 @@
 
 ### Steps for Gem5 Evaluation
 Here you will recreate results in Figure 3, 6, 7, 9, 10, and 11, by executing the following steps:
-- **Compile Gem5:** `cd gem5 ; scons -j50 build/X86/gem5.opt`
-- **Set Paths** in `scripts/env.sh`. You will set the following :
+- **Gem5编译:** `cd gem5 ; python3 `which scons` build/X86/gem5.opt -j20`
+- **配置Path** `scripts/env.sh`. 参考源码中配置 :
     - `GEM5_PATH`: the full path of the gem5 directory (that is, `<current-dirctory>/gem5`).
     - `SPEC17_PATH`: the path to your SPECint-CPU 2017 installation. 
     - `CKPT_PATH`: the path to a new folder where the checkpoints will be created next (for example, `<current-directory/cpts>`).
     - Optionally, modify `MAX_GEM5_PARALLEL_RUNS` to set the maximum number of parallel gem5 threads the system can support. For example, for a 30-core system, set the variable to 30.
     - Please source the paths as: `source scripts/env.sh` after modifying the file.
-- **Test Creating and Running Checkpoints:** For each program the we need to create a checkpoint of the program state after the initialization phase of the program is complete, which will be used to run the simulations with different Rowhammer defense configurations. 
+- **生成Checkpoints测试:** For each program the we need to create a checkpoint of the program state after the initialization phase of the program is complete, which will be used to run the simulations with different Rowhammer defense configurations. 
     - To test the checkpointing process, run `cd scripts; ./ckptscript_test.sh perlbench 4 2017;`: this will create a checkpoint after 1Mn instructions (should complete in a couple of minutes).
       * In case the `ckptscript_test.sh` fails with the error `$SPEC17_PATH/SPEC2017_inst/benchspec/CPU/500.perlbench_r/run/run_base_refrate_<config-name>-m64.<run-number>/perlbench_r_base.<config-name>-m64: No such file or directory` (or similar error message), it indicates the script is unable to find the run-directory for perlbench. Please follow the steps outlined in [README_SPEC_INSTALLATION.md](./README_SPEC_INSTALLATION.md) to ensure the run-directories are properly set up for all the SPEC-benchmarks.
-- **Run All Experiments:** for all the benchmarks, run `cd scripts; ./run_all.sh`. This will run the following scripts:
+- **运行实验:** for all the benchmarks, run `cd scripts; ./run_all.sh`. This will run the following scripts:
     - `create_checkpoints.sh` - This creates checkpoints for single-core and multi-core benchmarks.
       * **Create Checkpoint:** For each benchmark, the checkpoints will be created using `./ckptscript.sh <BENCHMARK> <NUM-CORES> <SPEC-VERSION>`. 
       	- By default, `ckptscript.sh` is run for 52 programs in parallel (18 single-core SPEC workloads, 18 multi-core SPEC workloads, and 14 multi-core MIXED workloads). 
@@ -49,7 +49,7 @@ Here you will recreate results in Figure 3, 6, 7, 9, 10, and 11, by executing th
           - `SPEC-VERSION`: Fixed to be 2017.
           - `RH-DEFENSE-PARAMETERS`: `--rh_defense` enables the defense, `--rh_mitigation=RQ` selects AQUA as the defense (RRS in place of RQ selects RRS defense), and  `--rh_actual_threshold=1000` specifies 1K as the rowhammer threshold. Additional runtime parameters like FPT-cache size, quarantine region size, etc. are present in `run_<aqua-or-rrs>_experiments.sh` scripts. In absence of `--rh_defense` parameter, the baseline configuration is run.
       	- Each configuration is simulated for 250Mn instructions. This takes 8-24 hours per benchmark, per configuration. Benchmarks in 2-3 configurations are run in parallel for a total of up to `MAX_GEM5_PARALLEL_RUNS` (defined in `scripts.env.sh`) parallel Gem5 runs at a time.
-- **Parse the results:** for Figures 3, 6, 7, 9, and 11 (Figure 10 remains **TODO**). Run the following script:
+- **实验结果解析:** for Figures 3, 6, 7, 9, and 11 (Figure 10 remains **TODO**). Run the following script:
     - `cd stats_scripts; ./collect_all_data.sh` This will parse the gem5 stat files and collect the relevant stats for all figures mentioned above. The data is stored in `data/` directory inside `stats_scripts` and will be used by plotting scripts. The script in turn calls `Figure_*.sh` which collect data required to plot that particular figure. 
     - Note that we will supply the script to collect data for Figure 10 by end of this week. We seem to have lost that script during refactoring the code. All other scripts will work as intended.
 <!-- -`cd stats_scripts; ./data_perf.sh`. This will compare the normalized performance (using weighted speedup metric) vs baseline.
@@ -63,10 +63,10 @@ Here you will recreate results in Figure 3, 6, 7, 9, 10, and 11, by executing th
       * Experiments are run using the script `./runscript.sh`
       * Results for normalized Perf vs. EncrLat can be generated using `cd stats_scripts; ./data_EncrLat.sh`. 
       * Results are stored in `stats_scripts/data/perf.EncLat.stat`. -->
-- **Visualize the results:** `cd graph_scripts; jupyter-notebook aqua_MICRO22_plots.ipynb` This will open a Jupyter Notebook session in the browser and will enable you to plot all the graphs. Remember to run the stats script command above before plotting the results.
+- **实验结果可视化:** `cd graph_scripts; jupyter-notebook aqua_MICRO22_plots.ipynb` This will open a Jupyter Notebook session in the browser and will enable you to plot all the graphs. Remember to run the stats script command above before plotting the results.
   - In the notebook, select the code for a given figure and click on Run either from the menu or within the top left corner of the selected cell.
-- **Note on Simulation Time:** Running all experiments takes almost 3-4 days on a system with 72 cores. Here is the order in which to reduce the simulation costs, if required:
-    - To shorten experiment run time, you may reduce instruction count (`MAX_INSTS`) in `runscript.sh`to 100Mn. This reduces the simulation time to 3.5 days with 72 cores.
+- **试验运行时间优化:** Running all experiments takes almost 3-4 days on a system with 72 cores. Here is the order in which to reduce the simulation costs, if required:
+    - To shorten experiment run time, you may reduce instruction count (`MAX_INSTS`) in `runscript.sh`to 100Mn（本实验MAX_INSTS调到100Mn）. This reduces the simulation time to 3.5 days with 72 cores（本实验40核跑了近一周）.
     - You may skip the scalability configuration for RRS (Figure 3) by commenting out the configurations in `RRS scalability configs` section in `run_rrs_experiments.sh`. This further reduces the simulation time to 3 days at the expense of Figure 3.
     - You may skip the scalability configuration for AQUA (Figure 11) by commenting out the configurations in `AQUA scalability configs` section in `run_aqua_experiments.sh`. This further reduces the simulation time to 2.5 days at the expense of Figure 3.
     - While discouraged, you may skip the comparison of AQUA with RRS (Figures 6 and 7) by commenting out the AQUA configurations in `AQUA SRAM config` section in `run_aqua_experiments.sh` _and_ commenting out the `run_rrs_experiments.sh` script from `run_all.sh` script. This further reduces the simulation time to 2 days at the expense of Figures 6 and 7.
