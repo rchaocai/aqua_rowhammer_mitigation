@@ -1,19 +1,23 @@
 ## AQUA: Scalable Rowhammer Mitigation by Quarantining Aggressor Rows at Runtime
-Authors: Anish Saxena, Gururaj Saileshwar, Prashant J. Nair, and Moinuddin K. Qureshi
+作者: Anish Saxena, Gururaj Saileshwar, Prashant J. Nair, and Moinuddin K. Qureshi
+论文地址 [MICRO 2022](https://www.microarch.org/micro55/)
+论文源码地址 [aqua_rowhammer_mitigation](https://github.com/Anish-Saxena/aqua_rowhammer_mitigation)
 
-To appear in [MICRO 2022](https://www.microarch.org/micro55/)
+### 介绍
 
-### Introduction
+原论文的源码基础上，在自己的服务器上复现，主要做一些本地环境改动以及依赖软件版本变更。
 
-This artifact covers the performance analysis of Aqua and RRS Rowhammer mitigations. 
-
-### Requirements For Performance Evaluations in Gem5 CPU Simulator:
-   - **SW Dependencies:** Gem5 Dependencies - gcc, Python-3.6.3, scons-3.
-     - Tested with gcc v6.4.0 and scons-3.0.5
-     - Scons-3.0.5 download [link](https://sourceforge.net/projects/scons/files/scons/3.0.5/scons-3.0.5.tar.gz/download). To install, `tar -zxvf scons-3.0.5.tar.gz` and `cd scons-3.0.5; python setup.py install` (use `--prefix=<PATH>` for local install).
-   - **Benchmark Dependencies:** [SPEC-2017](https://www.spec.org/cpu2017/) Installed.
-   - **HW Dependencies:** 
-     - A 72 core system to finish experiments in ~4 days. 
+### Gem5 CPU模拟器性能评估要求，实验环境和原作者不一样:
+   - **硬件配置:**
+     - 操作系统：CentOS Linux release 7.6.1810 `(命令：cat /etc/centos-release)`
+     - CPU架构：x86_64 `(命令：lscpu | grep -i Architecture)`
+     - CPU型号：Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz `(命令：cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c)`
+     - vCPU数：40 `(命令：cat /proc/cpuinfo | grep process | wc -l)`
+   - **软件依赖:** Gem5需要依赖gcc, Python, scons.
+     - gcc v8.3.1、scons v3.0.5、Python v3.6.8
+     - Scons-3.0.5安装，跟作者的安装方式不太一样 [下载链接](https://pypi.org/project/SCons/3.0.5/#files). 下载`scons-3.0.5-py2.py3-none-any.whl` 然后 `pip3 install scons-3.0.5-py2.py3-none-any.whl`.
+     - 数据分析库perl `(yum install perl-List-MoreUtils)`
+   - **基准测试集:** [SPEC-2017](https://www.spec.org/cpu2017/).
 
 ### Steps for Gem5 Evaluation
 Here you will recreate results in Figure 3, 6, 7, 9, 10, and 11, by executing the following steps:
